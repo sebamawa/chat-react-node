@@ -8,7 +8,7 @@ export default function Chat({socket}) {
     // mensaje a enviar en el input del form
     const [message, setMessage] = useState("");
 
-    const sendMessageSkt = (event, socket) => {
+    const sendMessageToServerSkt = (event, socket) => {
         console.log(event);
         event.preventDefault();
         console.log(`Msg enviado al servidor: ${message}`);
@@ -19,7 +19,7 @@ export default function Chat({socket}) {
     return (
         <>
             <div className="chat">
-                <form onSubmit={event => sendMessageSkt(event, socket)} >
+                <form onSubmit={event => sendMessageToServerSkt(event, socket)} >
                     <input
                         type="text"
                         value={message}

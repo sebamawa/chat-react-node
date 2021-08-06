@@ -12,19 +12,20 @@ import MessagesList from './components/MessagesList';
 const ENDPOINT = "http://localhost:4000";
 
 function App() {
-  // const [response, setResponse] = useState("");
   const socket = socketIOClient(ENDPOINT);
 
+  // el estado son los mensajes del chat. Se pasan como props a los hijos
+  const [messages, setMessages] = useState([]);
+
   useEffect(() => {
-    // const socket = socketIOClient(ENDPOINT);
-    // socket.on("MsgFromServer", data => {
-    //   setResponse(data);
-    // });
+    socket.on("MsgFromServer", msg => {
+      setMessages([...messages, msg]);
+    });
   });
 
   return (
     <>
-      <MessagesList socket={socket}/>
+      <MessagesList messages={messages}/>
       <Chat socket={socket}/>
     </>
   );
