@@ -4,6 +4,7 @@ import Chat from './components/Chat';
 import { useEffect, useState } from 'react';
 // import io from 'socket.io-client';
 import socketIOClient from 'socket.io-client';
+import MessagesList from './components/MessagesList';
 
 
 
@@ -23,6 +24,7 @@ function App() {
 
   return (
     <>
+      <MessagesList socket={socket}/>
       <Chat socket={socket}/>
     </>
   );

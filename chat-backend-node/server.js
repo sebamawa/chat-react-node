@@ -8,10 +8,11 @@ const io = new Server(server, {cors: {origin: "*", methods: ["GET", "POST"]}});
 
 io.on('connection', (socket) => {
     console.log('Socket connected');
-    socket.emit('MsgFromServer', 'Gracias por conectarse');
+    // socket.emit('MsgFromServer', 'Gracias por conectarse');
 
     socket.on("msg", (data) => {
-        console.log(data);
+        // console.log(data);
+        socket.emit('MsgFromServer', data);
     });
 });
 
