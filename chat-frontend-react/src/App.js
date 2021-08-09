@@ -15,7 +15,7 @@ function App() {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    socket.on("MsgFromServer", data => {
+    socket.on("whatsappweb-message", data => {
       const msg = {...data};
       setMessages([...messages, msg]);
     });
