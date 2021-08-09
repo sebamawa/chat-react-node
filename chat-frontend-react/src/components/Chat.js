@@ -14,7 +14,7 @@ export default function Chat({socket, messages, onRemoveMessage = f => f}) {
         console.log(event);
         event.preventDefault();
         console.log(`Msg enviado al servidor: ${message}`);
-        socket.emit('msg', message);
+        socket.emit('msgFromMe', message);
         setMessage("");
     }
 

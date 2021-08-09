@@ -30,6 +30,7 @@ const SESSION_FILE_PATH = './session.json';
 let client;
 let sessionData;
 let idMsg = 1;
+let socketGlobal = null;
 let contactsArr = [
     {
         name: 'Marcos',
@@ -55,7 +56,7 @@ let contactsArr = [
  * Mantiene la sesion una vez conectado el navegador con el dispositivo.
  * Utiliza claves-valor ('cookies').
  */
-const withSession = (socket) => {
+const withSession = async () => {
     // Si existe cargamos el archivo con credenciales de la sesion
     const spinner = ora(`Cargando ${chalk.yellow('Validando session con Whatsapp...')}`);
     // archivo que contiene la sesion
@@ -70,7 +71,7 @@ const withSession = (socket) => {
     client.on('ready', () => {
         console.log('Client is ready!');
         spinner.stop();
-        listenMessage(socket); // escucha por mensajes recibidos
+        listenMessage(); // escucha por mensajes recibidos
         // listenRevokeMessage(); // escucha por mensajes borrados para todos 
     })
 
@@ -81,13 +82,15 @@ const withSession = (socket) => {
     })
 
     client.initialize();
+
+
 }
 
 /**
  * Para cuando conecta por primera vez navegador con dispositivo.
  * Genera QRCODE
  */ 
-const withOutSession = async (socket) => {
+const withOutSession = async () => {
 
     console.log('NO hay sesion guardada');
     client = new Client();
@@ -117,7 +120,7 @@ const withOutSession = async (socket) => {
 
     client.on('ready', () => {
         console.log('Client is ready!');
-        listenMessage(socket); // escucha por mensajes recibidos
+        listenMessage(); // escucha por mensajes recibidos
         // listenRevokeMessage(); // escucha por mensajes borrados para todos 
     });
 
@@ -132,7 +135,7 @@ const withOutSession = async (socket) => {
 /**
  * Escucha nuevos mensajes de whatsapp. Se llama desde cliente.on('ready')
  */
- const listenMessage = (socket) => {
+ const listenMessage = () => {
 
     // mensaje de un whatsapp
      client.on('message', (msg) => {
@@ -142,25 +145,28 @@ const withOutSession = async (socket) => {
          console.log(body); // no imprime body para grupos
 
          // determino contacto del mensaje
-         let contact = contactsArr.find(contact => from.includes(contact.phone));
+         // let contact = contactsArr.find(contact => from.includes(contact.phone));
 
          // envio mensaje de whatsapp al browser
          const msgToBrowser = {
             id: idMsg,
-            author: author,
+            author: from,
             text: body
-         }
-         // socket.emit('whatsappweb-message', `${contact.name}: ${body}`);
-         socket.emit('whatsappweb-message', msgToBrowser);
-         idMsg++;
+         };
+         console.log(msgToBrowser);
+         // si el socket esta abierto mando reenvio mensaje de wp al browser
+         if (socketGlobal) {
+            socketGlobal.emit('whatsappweb-message', msgToBrowser);
+            idMsg++;
+         } 
      });
 
-    // espero mensaje del browser y lo reenvio (por ahora solo a Marcos)
-        socket.on('browser-message', (msg) => {
-        console.log(msg);
-        // enviar a quien corresponda (to number)
-        sendMessage('59893545877@c.us', msg);
-    });
+    // // espero mensaje del browser y lo reenvio (por ahora solo a Marcos)
+    //     socket.on('browser-message', (msg) => {
+    //     console.log(msg);
+    //     // enviar a quien corresponda (to number)
+    //     sendMessage('59893545877@c.us', msg);
+    // });
  }
 
  const listenRevokeMessage = () => {  
@@ -190,16 +196,27 @@ const withOutSession = async (socket) => {
  }
 
 
-// espero conexion sobre el socket del cliente (abrir pagina)
+// espero conexion sobre el socket del cliente (al abrir pagina)
 io.on('connection', (socket) => {
     console.log('Socket opened');
     // si existe o no el archivo con datos de la sesion llama a funcion que corresponda
     // CORREGIR: CARGA SESION DE WPWEB CADA VEZ SE CONECTA UN CLIENTE ---> DEMORA
-    (fs.existsSync(SESSION_FILE_PATH)) ? withSession(socket) : withOutSession(socket);
+    // (fs.existsSync(SESSION_FILE_PATH)) ? withSession(socket) : withOutSession(socket);
+    socketGlobal = socket;
+    socket.on("msgFromMe", (data) => {
+        // console.log(data);
+        const msg = {
+            id: idMsg,
+            author: 'author YO',
+            text: data,
+        };
+        idMsg++;
+        socket.emit('MsgFromServer', msg);
+    });
 });
 
 // // si existe o no el archivo con datos de la sesion llama a funcion que corresponda
-// (fs.existsSync(SESSION_FILE_PATH)) ? withSession() : withOutSession();
+(fs.existsSync(SESSION_FILE_PATH)) ? withSession() : withOutSession();
 
 
 server.listen(4000, () => {
