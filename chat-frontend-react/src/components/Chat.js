@@ -20,7 +20,7 @@ export default function Chat({socket, messages, onRemoveMessage = f => f}) {
 
     return (
         <>
-            <Card bg="warning"  border="primary" style={{ width: '30rem', height: '40rem' }} >
+            <Card bg="warning"  border="primary" style={{ width: '30rem', height: '50rem' }} >
                 <Card.Header>CHAT</Card.Header>
                 <Card.Body>
                     {/* <Card.Text> */}

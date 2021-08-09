@@ -81,7 +81,7 @@ const withSession = async () => {
         console.log('** Error de autentificacion. Vuelva a generar el QRCODE (Borrar el archivo session.json)');
     })
 
-    client.initialize();
+    await client.initialize();
 
 
 }
